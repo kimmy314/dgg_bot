@@ -104,8 +104,12 @@ async function doneHandler(message) {
             if (currHundreds > prevHundreds) {
                 message.channel.send(`The total count is now at ${channelCounts[channelId]}!`);
             }
-
-            message.react('👍');
+            
+            if (message.author.id == 340576035663773699) {
+                message.react('<:cheng:1263644903733461042>')
+            } else {
+                message.react('👍');
+            }
         }
     }
 }
