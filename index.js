@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
-const { initializeChannelCount, channelCounts, countMessage } = require('./utils');
+const { initializeChannelCount, channelCounts, handleMessage } = require('./utils');
 
 const client = new Client({
     intents: [
@@ -93,7 +93,7 @@ async function doneHandler(message) {
         const countMatch = message.content.match(/^(\d+)\s+done$/);
         if (countMatch) {
             const prevCount = channelCounts[channelId];
-            countMessage(channelId, message);
+            handleMessage(message);
             const currCount = channelCounts[channelId];
 
             // Check if the previous count was below a hundreds boundary and the current count is at or above a new hundreds boundary
