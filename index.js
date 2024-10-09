@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+const { token, channels } = require('./config.json');
 const { initializeChannelCount, channelCounts, handleMessage } = require('./utils');
 
 const client = new Client({
@@ -81,11 +81,19 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+function isAppropriateChannel(message) {
+    if (channels) {
+        return channels.includes(message.channelId);
+    } else {
+        const channelName = message.channel.name.toLowerCase();
+        // if the channel name has count in it or test
+        return channelName.includes('count') || channelName.includes('test');
+    }
+}
+
 async function doneHandler(message) {
     const channelId = message.channel.id
-    // if the channel name has count in it or test
-    const channelName = message.channel.name.toLowerCase();
-    if (channelName.includes('count') || channelName.includes('test')) {
+    if (isAppropriateChannel(message)) {
         if (!channelCounts[channelId]) {
             await initializeChannelCount(client, channelId);
         }
