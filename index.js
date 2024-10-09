@@ -82,27 +82,31 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 async function doneHandler(message) {
-    const channelId = message.channel.id;
-
-    if (!channelCounts[channelId]) {
-        await initializeChannelCount(client, channelId);
-    }
-
-    const countMatch = message.content.match(/^(\d+)\s+done$/);
-    if (countMatch) {
-        const prevCount = channelCounts[channelId];
-        const currCount = parseInt(countMatch[1], 10);
-        channelCounts[channelId] += currCount;
-
-        // Check if the previous count was below a hundreds boundary and the current count is at or above a new hundreds boundary
-        const prevHundreds = Math.floor(prevCount / 100);
-        const currHundreds = Math.floor(channelCounts[channelId] / 100);
-
-        if (currHundreds > prevHundreds) {
-            message.channel.send(`The total count is now at ${channelCounts[channelId]}!`);
+    const channelId = message.channel.id
+    // if the channel name has count in it or test
+    const channelName = message.channel.name.toLowerCase();
+    if (channelName.includes('count') || channelName.includes('test')) {
+        console.log(message.content)
+        if (!channelCounts[channelId]) {
+            await initializeChannelCount(client, channelId);
         }
 
-        message.react('👍');
+        const countMatch = message.content.match(/^(\d+)\s+done$/);
+        if (countMatch) {
+            const prevCount = channelCounts[channelId];
+            const currCount = parseInt(countMatch[1], 10);
+            channelCounts[channelId] += currCount;
+
+            // Check if the previous count was below a hundreds boundary and the current count is at or above a new hundreds boundary
+            const prevHundreds = Math.floor(prevCount / 100);
+            const currHundreds = Math.floor(channelCounts[channelId] / 100);
+
+            if (currHundreds > prevHundreds) {
+                message.channel.send(`The total count is now at ${channelCounts[channelId]}!`);
+            }
+
+            message.react('👍');
+        }
     }
 }
 
