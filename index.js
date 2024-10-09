@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
-const { initializeChannelCount, channelCounts } = require('./utils');
+const { initializeChannelCount, channelCounts, countMessage } = require('./utils');
 
 const client = new Client({
     intents: [
@@ -86,7 +86,6 @@ async function doneHandler(message) {
     // if the channel name has count in it or test
     const channelName = message.channel.name.toLowerCase();
     if (channelName.includes('count') || channelName.includes('test')) {
-        console.log(message.content)
         if (!channelCounts[channelId]) {
             await initializeChannelCount(client, channelId);
         }
@@ -94,21 +93,15 @@ async function doneHandler(message) {
         const countMatch = message.content.match(/^(\d+)\s+done$/);
         if (countMatch) {
             const prevCount = channelCounts[channelId];
-            const currCount = parseInt(countMatch[1], 10);
-            channelCounts[channelId] += currCount;
+            countMessage(channelId, message);
+            const currCount = channelCounts[channelId];
 
             // Check if the previous count was below a hundreds boundary and the current count is at or above a new hundreds boundary
             const prevHundreds = Math.floor(prevCount / 100);
-            const currHundreds = Math.floor(channelCounts[channelId] / 100);
+            const currHundreds = Math.floor(currCount / 100);
 
             if (currHundreds > prevHundreds) {
                 message.channel.send(`The total count is now at ${channelCounts[channelId]}!`);
-            }
-            
-            if (message.author.id == 340576035663773699) {
-                message.react('<:cheng:1263644903733461042>')
-            } else {
-                message.react('👍');
             }
         }
     }
