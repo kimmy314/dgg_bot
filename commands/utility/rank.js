@@ -28,8 +28,8 @@ module.exports = {
 
             let reply = `You are in ${toOrdinal(requestorIndex + 1)} place with ${requestorCount}.`;
 
-            if (requestorIndex !== 0) {
-                reply += ` Just ${rankings[0].quantity - requestorCount} to go!`;
+            if (requestorIndex > 0) {
+                reply += ` You only need to do ${rankings[requestorIndex - 1].quantity - requestorCount + 1} more to be ${toOrdinal(requestorIndex)}!`;
             }
 
             interaction.reply(reply);

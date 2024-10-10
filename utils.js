@@ -14,12 +14,12 @@ async function initializeChannelCount(client, channelId) {
     console.log("Counting from history")
     const channel = await client.channels.fetch(channelId);
     channelCounts[channelId] = 0;
-    let messages = await channel.messages.fetch({limit: 100});
+    let messages = await channel.messages.fetch({ limit: 100 });
     while (messages.size > 0) {
         messages.forEach(message => {
             handleMessage(message, MessageType.Historical);
         });
-        messages = await channel.messages.fetch({limit: 100, before: messages.last().id});
+        messages = await channel.messages.fetch({ limit: 100, before: messages.last().id });
     }
 }
 
@@ -47,11 +47,11 @@ async function handleReport(message, messageType) {
     }
 }
 
-async function countReport({message, quantity}) {
+async function countReport({ message, quantity }) {
     channelCounts[message.channelId] += quantity;
 }
 
-async function reactToReport({message}) {
+async function reactToReport({ message }) {
     if (message.author.id == 340576035663773699) {
         message.react('<:cheng:1263644903733461042>')
     } else {
@@ -59,7 +59,7 @@ async function reactToReport({message}) {
     }
 }
 
-async function updateLongestStreak({message}) {
+async function updateLongestStreak({ message }) {
     const reportsByUserInChannel = getReportsInChannelByUser(message.author.id, message.channel.id);
 
     let longestStreak = 1;
@@ -78,7 +78,7 @@ async function updateLongestStreak({message}) {
         }
 
         skippedLastReport = false;
-        
+
         if (moment(createdAt.format('YYYY MM DD') === nextDay.format('YYYY MM DD'))) {
             currentStreak++;
             if (currentStreak > longestStreak) {
@@ -124,7 +124,7 @@ function channelRankings(channelId) {
     for (const report of reportsInChannel) {
         const id = report.message.author.id;
         if (!countsByAuthor[id]) {
-            countsByAuthor[id] = { 
+            countsByAuthor[id] = {
                 user: report.message.author,
                 quantity: report.quantity,
             };
@@ -133,7 +133,7 @@ function channelRankings(channelId) {
         }
     }
 
-    return Object.values(countsByAuthor).sort(({quantity: q1}, {quantity: q2}) => q2 - q1);;
+    return Object.values(countsByAuthor).sort(({ quantity: q1 }, { quantity: q2 }) => q2 - q1);;
 }
 
 module.exports = { initializeChannelCount, channelCounts, handleMessage, reports, countDistinctDays, channelRankings }
