@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { initializeChannelCount, reports } = require('../../utils');
+const { initializeChannelCount, reports, channelRankings } = require('../../utils');
 
 function toOrdinal(number) {
     // Shamelessly stolen from https://stackoverflow.com/a/39466341
@@ -21,32 +21,19 @@ module.exports = {
         const userId = interaction.user.id;
 
         try {
-            const reportsInChannel = reports.filter(report => report.message.channel.id === channelId);
+            const rankings = channelRankings(channelId);
 
-            const countsByAuthor = {};
-            for (const report of reportsInChannel) {
-                countsByAuthor[report.message.author.id] = (countsByAuthor[report.message.author.id] || 0) + report.quantity;
-            }
+            const requestorIndex = rankings.findIndex(({user}) => user.id === userId);
+            const requestorCount = rankings[requestorIndex].quantity;
 
-            const countsEntries = Object.entries(countsByAuthor).sort(([a, c1], [b, c2]) => c2 - c1);
-
-            const requestorIndex = countsEntries.findIndex(([author]) => author === userId);
-
-            const userIdToName = reportsInChannel.reduce((map, report) => {
-                map[report.message.author.id] = report.message.author.username;
-                return map;
-            }, {});
-
-            const requestorCount = countsByAuthor[userId];
-
-            const topN = countsEntries.slice(0, 5);
+            const topN = rankings.slice(0, 5);
 
             const reply = [];
 
             if (topN.length > 0) {
                 reply.push('```');
                 for (let i = 0; i < topN.length; ++i) {
-                    reply.push(`${i + 1} | ${userIdToName[topN[i][0]].padStart(30)} | ${topN[i][1]}`);
+                    reply.push(`${i + 1} | ${topN[i].user.username.padStart(30)} | ${topN[i].quantity}`);
                 }
                 reply.push('```');
             }

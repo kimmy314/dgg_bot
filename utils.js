@@ -58,7 +58,7 @@ async function reactToReport({message}) {
 }
 
 async function updateLongestStreak({message}) {
-    const reportsByUserInChannel = reports.filter(report => report.message.author.id === message.author.id && report.message.channel.id === message.channel.id);
+    const reportsByUserInChannel = getReportsInChannelByUser(message.author.id, message.channel.id);
 
     function getDayAfter(date) {
         // Month is 1-indexed (why? 😩)
@@ -114,4 +114,35 @@ async function updateLongestStreak({message}) {
     }
 }
 
-module.exports = { initializeChannelCount, channelCounts, handleMessage, reports }
+function getReportsInChannelByUser(userId, channelId) {
+    return reports.filter(report => report.message.author.id === userId && report.message.channel.id === channelId);
+}
+
+function countDistinctDays(userId, channelId) {
+    const reportsInChannelByUser = getReportsInChannelByUser(userId, channelId);
+    const reportDays = reportsInChannelByUser.map(report => report.message.createdAt).map(date => `${date.getFullYear()} ${date.getMonth()} ${date.getDate()}`);
+    const distinctDays = new Set(reportDays);
+    return distinctDays.size;
+}
+
+function channelRankings(channelId) {
+    const reportsInChannel = reports.filter(report => report.message.channel.id === channelId);
+
+    const countsByAuthor = {};
+
+    for (const report of reportsInChannel) {
+        const id = report.message.author.id;
+        if (!countsByAuthor[id]) {
+            countsByAuthor[id] = { 
+                user: report.message.author,
+                quantity: report.quantity,
+            };
+        } else {
+            countsByAuthor[id].quantity += report.quantity;
+        }
+    }
+
+    return Object.values(countsByAuthor).sort(({quantity: q1}, {quantity: q2}) => q2 - q1);;
+}
+
+module.exports = { initializeChannelCount, channelCounts, handleMessage, reports, countDistinctDays, channelRankings }
