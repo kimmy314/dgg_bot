@@ -15,7 +15,7 @@ async function initializeChannelCount(client, channelId) {
     let messages = await channel.messages.fetch({limit: 100});
     while (messages.size > 0) {
         messages.forEach(message => {
-            handleMessageInternal(message, MessageType.Historical);
+            handleMessage(message, MessageType.Historical);
         });
         messages = await channel.messages.fetch({limit: 100, before: messages.last().id});
     }
