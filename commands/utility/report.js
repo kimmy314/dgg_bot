@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const {  reports, channelRankings, countDistinctDays } = require('../../utils');
+const { channelRankings, countDistinctDays } = require('../../utils');
 
 function toTable(headers, rows) {
     headers = headers.map(header => `${header}`);
@@ -36,7 +36,7 @@ module.exports = {
 
             interaction.reply(toTable(
                 ['#', 'user', 'quantity', 'days'],
-                rankings.map(({user, quantity, distinctDays}, index) => [index + 1, user.username, quantity, distinctDays])
+                await Promise.all(rankings.map(async ({ user, quantity, distinctDays }, index) => [index + 1, (await interaction.guild.members.fetch(user.id)).nickname, quantity, distinctDays]))
             ));
         } catch (error) {
             console.error(error);
