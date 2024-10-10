@@ -38,7 +38,7 @@ module.exports = {
 
             interaction.reply(toTable(
                 ['#', 'user', 'quantity', 'days'],
-                rankings.map(({ user, quantity, distinctDays }, index) => [index + 1, guildMembers.get(user.id).nickname, quantity, distinctDays])
+                rankings.map(({ user, quantity, distinctDays }, index) => [index + 1, guildMembers.get(user.id).nickname || user.displayName, quantity, distinctDays])
             ));
         } catch (error) {
             console.error(error);
