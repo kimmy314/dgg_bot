@@ -34,9 +34,11 @@ module.exports = {
                 ranking.distinctDays = countDistinctDays(ranking.user.id, channelId);
             }
 
+            const guildMembers = await interaction.guild.members.fetch({ user: rankings.map(ranking => ranking.user.id)});
+
             interaction.reply(toTable(
                 ['#', 'user', 'quantity', 'days'],
-                await Promise.all(rankings.map(async ({ user, quantity, distinctDays }, index) => [index + 1, (await interaction.guild.members.fetch(user.id)).nickname, quantity, distinctDays]))
+                rankings.map(({ user, quantity, distinctDays }, index) => [index + 1, guildMembers.get(user.id).nickname, quantity, distinctDays])
             ));
         } catch (error) {
             console.error(error);
