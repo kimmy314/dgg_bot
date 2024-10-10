@@ -114,4 +114,4 @@ async function updateLongestStreak({message}) {
     }
 }
 
-module.exports = { initializeChannelCount, channelCounts, handleMessage }
+module.exports = { initializeChannelCount, channelCounts, handleMessage, reports }
