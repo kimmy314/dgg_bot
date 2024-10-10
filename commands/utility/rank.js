@@ -26,21 +26,13 @@ module.exports = {
             const requestorIndex = rankings.findIndex(({user}) => user.id === userId);
             const requestorCount = rankings[requestorIndex].quantity;
 
-            const topN = rankings.slice(0, 5);
+            let reply = `You are in ${toOrdinal(requestorIndex + 1)} place with ${requestorCount}.`;
 
-            const reply = [];
-
-            if (topN.length > 0) {
-                reply.push('```');
-                for (let i = 0; i < topN.length; ++i) {
-                    reply.push(`${i + 1} | ${topN[i].user.username.padStart(30)} | ${topN[i].quantity}`);
-                }
-                reply.push('```');
+            if (requestorIndex !== 0) {
+                reply += ` Just ${rankings[0].quantity - requestorCount} to go!`;
             }
 
-            reply.push(`You are in ${toOrdinal(requestorIndex + 1)} place with ${requestorCount}`);
-
-            interaction.reply(reply.join('\n'));
+            interaction.reply(reply);
         } catch (error) {
             console.error(error);
             await interaction.reply('There was an error while fetching the message history.');
