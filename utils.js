@@ -1,3 +1,5 @@
+const moment = require('moment-timezone');
+
 const channelCounts = {};
 const reports = [];
 
@@ -120,7 +122,7 @@ function getReportsInChannelByUser(userId, channelId) {
 
 function countDistinctDays(userId, channelId) {
     const reportsInChannelByUser = getReportsInChannelByUser(userId, channelId);
-    const reportDays = reportsInChannelByUser.map(report => report.message.createdAt).map(date => `${date.getFullYear()} ${date.getMonth()} ${date.getDate()}`);
+    const reportDays = reportsInChannelByUser.map(report => moment(report.message.createdAt, "US/Pacific").format('YYYY MM DD'));
     const distinctDays = new Set(reportDays);
     return distinctDays.size;
 }

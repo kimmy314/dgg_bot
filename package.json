@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "discord.js": "^14.16.3"
+    "discord.js": "^14.16.3",
+    "moment-timezone": "^0.5.46"
   },
   "name": "dgg_bot",
   "description": "bot for counting when a user says `# done` keeps track of accumulation per user keeps track of total for the channel",
