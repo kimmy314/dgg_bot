@@ -62,27 +62,16 @@ async function reactToReport({message}) {
 async function updateLongestStreak({message}) {
     const reportsByUserInChannel = getReportsInChannelByUser(message.author.id, message.channel.id);
 
-    function getDayAfter(date) {
-        // Month is 1-indexed (why? 😩)
-        const next = new Date(`${date.getFullYear()} ${date.getMonth() + 1} ${date.getDate()}`);
-        // setDate automatically rolls over the day/month/year as appropriate, however the constructor does not. If we had tried to do this there it would result in invalid dates.
-        next.setDate(date.getDate() + 1);
-        return next;
-    }
-
-    // Javascript's Date class provides methods for working in the local timezone or UTC. Ideally this would behave consistantly regardless of where the bot is deployed, but I think that may require a more sophisticated library.
-
     let longestStreak = 1;
     let currentStreak = 1;
-    let nextDay = getDayAfter(reportsByUserInChannel[0].message.createdAt);
+    let nextDay = moment(reportsByUserInChannel[0].message.createdAt, "US/Pacific").startOf('day').add(1, 'day');
     let skippedLastReport = false;
 
     for (let i = 1; i < reportsByUserInChannel.length; ++i) {
         const report = reportsByUserInChannel[i];
-        const createdAt = report.message.createdAt;
+        const createdAt = moment(report.message.createdAt, "US/Pacific");
 
-
-        if (createdAt < nextDay) {
+        if (createdAt.isBefore(nextDay)) {
             // multiple reports in a single day don't help.
             skippedLastReport = true;
             continue;
@@ -90,7 +79,7 @@ async function updateLongestStreak({message}) {
 
         skippedLastReport = false;
         
-        if (createdAt.getFullYear() === nextDay.getFullYear() && createdAt.getMonth() === nextDay.getMonth() && createdAt.getDate() === nextDay.getDate()) {
+        if (moment(createdAt.format('YYYY MM DD') === nextDay.format('YYYY MM DD'))) {
             currentStreak++;
             if (currentStreak > longestStreak) {
                 longestStreak = currentStreak;
@@ -99,7 +88,7 @@ async function updateLongestStreak({message}) {
             currentStreak = 1;
         }
 
-        nextDay = getDayAfter(createdAt);
+        nextDay = createdAt.startOf('day').add(1, 'day');
     }
 
     // If we didn't skip the last report then it contributed to making the current streak and we should notify the user.
