@@ -33,8 +33,8 @@ class ReportManager {
                 console.log(`Initializing ${channel.name}.`)
                 manager.#initializeChannelCount().then(() => {
                     resolve(manager);
+                    console.log(`Finished initializing ${channel.name}.`);
                 });
-                console.log(`Finished initializing ${channel.name}.`);
             });
         }
         return Promise.all(Object.values(ReportManager.#managers));
