@@ -27,7 +27,8 @@ module.exports = {
 
             interaction.reply(formatAsTable(
                 ['#', 'user', 'quantity', 'days'],
-                rankings.map(({ user, quantity, distinctDays }, index) => [index + 1, guildMembers.get(user.id).nickname || user.displayName, quantity, distinctDays])
+                rankings.map(({ user, quantity, distinctDays }, index) => [index + 1, guildMembers.get(user.id).nickname || user.displayName, quantity, distinctDays]),
+                ['', '', manager.totalCount, '']
             ));
         } catch (error) {
             console.error(error);
