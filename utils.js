@@ -98,7 +98,7 @@ async function updateLongestStreak({ message }) {
     if (!skippedLastReport && currentStreak > 1) {
         const reply = [];
 
-        reply.push(`You are on a streak of ${currentStreak} days!`);
+        reply.push(`You are on a ${currentStreak}-day streak!`);
 
         if (longestStreak !== currentStreak && longestStreak > 1) {
             reply.push(`Your longest streak so far was ${longestStreak} days.`);
