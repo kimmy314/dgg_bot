@@ -1,3 +1,4 @@
+const { Client, GuildBasedChannel, Message } = require('discord.js');
 const moment = require('moment-timezone');
 
 const REPORT_REGEX = /^(\d+)\s+done$/;
@@ -6,6 +7,12 @@ const MessageType = {
     Live: "Live",
     Historical: "Historical"
 };
+
+/**
+ * @typedef {Object} Report
+ * @property {Message<true>} message
+ * @property {number} quantity
+ */
 
 class ReportManager {
     /** @type {Object.<string, Promise<ReportManager>} */
@@ -36,14 +43,17 @@ class ReportManager {
     #client;
     #channel;
 
-    reports;
-    totalCount;
+    /** @type {Report[]} */
+    reports = [];
+    totalCount = 0;
 
+    /**
+     * @param {Client} client 
+     * @param {GuildBasedChannel} channel 
+     */
     constructor(client, channel) {
         this.#client = client;
         this.#channel = channel;
-        this.reports = [];
-        this.totalCount = 0;
     }
 
     getReportsByUser(userId) {

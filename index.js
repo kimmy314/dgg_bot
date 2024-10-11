@@ -107,7 +107,7 @@ async function doneHandler(message) {
     const channelId = message.channel.id
     if (isAppropriateChannel(message)) {
         const manager = await ReportManager.forChannel(channelId);
-console.log(channelId, manager);
+
         const countMatch = message.content.match(/^(\d+)\s+done$/);
         if (countMatch) {
             const prevCount = manager.totalCount;
