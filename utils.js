@@ -21,6 +21,7 @@ async function initializeChannelCount(client, channelId) {
         });
         messages = await channel.messages.fetch({ limit: 100, before: messages.last().id });
     }
+    console.log("finished counting")
 }
 
 async function handleMessage(message, messageType = MessageType.Live) {
