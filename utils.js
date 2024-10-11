@@ -64,12 +64,12 @@ async function updateLongestStreak({ message }) {
 
     let longestStreak = 1;
     let currentStreak = 1;
-    let nextDay = moment(reportsByUserInChannel[0].message.createdAt, "US/Pacific").startOf('day').add(1, 'day');
+    let nextDay = moment(reportsByUserInChannel[0].message.createdAt).tz("US/Pacific").startOf('day').add(1, 'day');
     let skippedLastReport = false;
 
     for (let i = 1; i < reportsByUserInChannel.length; ++i) {
         const report = reportsByUserInChannel[i];
-        const createdAt = moment(report.message.createdAt, "US/Pacific");
+        const createdAt = moment(report.message.createdAt).tz("US/Pacific");
 
         if (createdAt.isBefore(nextDay)) {
             // multiple reports in a single day don't help.
@@ -79,7 +79,7 @@ async function updateLongestStreak({ message }) {
 
         skippedLastReport = false;
 
-        if (moment(createdAt.format('YYYY MM DD') === nextDay.format('YYYY MM DD'))) {
+        if (createdAt.format('YYYY MM DD') === nextDay.format('YYYY MM DD')) {
             currentStreak++;
             if (currentStreak > longestStreak) {
                 longestStreak = currentStreak;
@@ -111,7 +111,7 @@ function getReportsInChannelByUser(userId, channelId) {
 
 function countDistinctDays(userId, channelId) {
     const reportsInChannelByUser = getReportsInChannelByUser(userId, channelId);
-    const reportDays = reportsInChannelByUser.map(report => moment(report.message.createdAt, "US/Pacific").format('YYYY MM DD'));
+    const reportDays = reportsInChannelByUser.map(report => moment(report.message.createdAt).tz("US/Pacific").format('YYYY MM DD'));
     const distinctDays = new Set(reportDays);
     return distinctDays.size;
 }
