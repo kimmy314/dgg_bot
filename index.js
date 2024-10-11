@@ -42,7 +42,7 @@ client.once(Events.ClientReady, async c => {
             : guild.channels.cache.filter(channel => channel.name.includes('count'))
     )].map(([id, channel]) => channel);
 
-    console.log(`Initializing ${channels.size} channels.`);
+    console.log(`Initializing ${channels.length} channels.`);
 
     await ReportManager.initializeManagers(client, channels);
 
