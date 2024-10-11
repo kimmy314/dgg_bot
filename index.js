@@ -35,6 +35,16 @@ for (const folder of commandFolders) {
 
 client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
+
+    client.guilds.cache.forEach(guild => {
+        const channels = guild.channels.cache.filter(channel =>
+            channel.name.includes('count')
+        );
+
+        channels.forEach(channel => {
+            initializeChannelCount(client, channel.id); // Replace this with your actual function
+        }); 
+    });
 });
 
 client.on(Events.InteractionCreate, async interaction => {
