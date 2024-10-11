@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { initializeChannelCount, channelCounts } = require('../../utils');
+const { ReportManager } = require('../../report-manager');
 
 module.exports = {
     category: 'utility',
@@ -15,11 +15,8 @@ module.exports = {
         const channelId = interaction.channel.id;
 
         try {
-            if (!channelCounts[channelId]) {
-                await initializeChannelCount(interaction.client, channelId);
-            }
-
-            const totalCount = channelCounts[channelId];
+            const manager = await ReportManager.forChannel(channelId);
+            const totalCount = manager.totalCount;
             await interaction.reply(`Total count for this channel from message history is ${totalCount}.`);
         } catch (error) {
             console.error(error);

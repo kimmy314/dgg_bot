@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { initializeChannelCount, reports, channelRankings } = require('../../utils');
+const { ReportManager } = require('../../report-manager');
 
 function toOrdinal(number) {
     // Shamelessly stolen from https://stackoverflow.com/a/39466341
@@ -21,7 +21,8 @@ module.exports = {
         const userId = interaction.user.id;
 
         try {
-            const rankings = channelRankings(channelId);
+            const manager = await ReportManager.forChannel(channelId);
+            const rankings = manager.rankings();
 
             const requestorIndex = rankings.findIndex(({user}) => user.id === userId);
             const requestorCount = rankings[requestorIndex].quantity;

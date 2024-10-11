@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const config = require('./config.json');
-const { initializeChannelCount, channelCounts, handleMessage } = require('./utils');
+const { ReportManager } = require('./report-manager');
 
 const client = new Client({
     intents: [
@@ -36,19 +36,15 @@ for (const folder of commandFolders) {
 client.once(Events.ClientReady, async c => {
     console.log(`Logged in as ${c.user.tag}.`);
 
-    const channelsToInitialize = client.guilds.cache.flatMap(guild => 
+    const channels = [...client.guilds.cache.flatMap(guild => 
         (config.channels)
             ? guild.channels.cache.filter(channel => config.channels.includes(channel.id))
             : guild.channels.cache.filter(channel => channel.name.includes('count'))
-    );
+    )].map(([id, channel]) => channel);
 
-    console.log(`Initializing ${channelsToInitialize.size} channels.`);
+    console.log(`Initializing ${channels.size} channels.`);
 
-    await Promise.all(channelsToInitialize.map(async channel => {
-        console.log(`Initializing ${channel.name}.`)
-        await initializeChannelCount(client, channel.id); // Replace this with your actual function
-        console.log(`Done.`);
-    }));
+    await ReportManager.initializeManagers(client, channels);
 
     console.log(`All channels initialized. Ready to receive inputs.`);
 });
@@ -110,22 +106,20 @@ function isAppropriateChannel(message) {
 async function doneHandler(message) {
     const channelId = message.channel.id
     if (isAppropriateChannel(message)) {
-        if (!channelCounts[channelId]) {
-            await initializeChannelCount(client, channelId);
-        }
-
+        const manager = await ReportManager.forChannel(channelId);
+console.log(channelId, manager);
         const countMatch = message.content.match(/^(\d+)\s+done$/);
         if (countMatch) {
-            const prevCount = channelCounts[channelId];
-            handleMessage(message);
-            const currCount = channelCounts[channelId];
+            const prevCount = manager.totalCount;
+            manager.handleMessage(message);
+            const currCount = manager.totalCount;
 
             // Check if the previous count was below a hundreds boundary and the current count is at or above a new hundreds boundary
             const prevHundreds = Math.floor(prevCount / 100);
             const currHundreds = Math.floor(currCount / 100);
 
             if (currHundreds > prevHundreds) {
-                message.channel.send(`The total count is now at ${channelCounts[channelId]}!`);
+                message.channel.send(`The total count is now at ${manager.totalCount}!`);
             }
         }
     }

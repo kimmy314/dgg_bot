@@ -1,18 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { channelRankings, countDistinctDays } = require('../../utils');
-
-function toTable(headers, rows) {
-    headers = headers.map(header => `${header}`);
-    rows = rows.map(row => row.map(cell => `${cell}`));
-
-    const widths = headers.map((header, index) => Math.max(...[header, ...rows.map(row => row[index])].map(s => s.length)));
-
-    const header = headers.map((header, index) => header.padStart(widths[index])).join(' | ')
-    const divider = new Array(widths.reduce((acc, a) => acc + a, 0) + (widths.length * 3)).fill('-').join('');
-    const body = rows.map(row => row.map((string, index) => string.padStart(widths[index])).join(' | ')).join('\n');
-
-    return '```' + `${header}\n${divider}\n${body}` + '```';
-}
+const { formatAsTable } = require('../../utils');
+const { ReportManager } = require('../../report-manager');
 
 module.exports = {
     category: 'utility',
@@ -28,15 +16,16 @@ module.exports = {
         const channelId = interaction.channel.id;
 
         try {
-            const rankings = channelRankings(channelId);
+            const manager = await ReportManager.forChannel(channelId);
+            const rankings = manager.rankings(channelId);
 
             for (const ranking of rankings) {
-                ranking.distinctDays = countDistinctDays(ranking.user.id, channelId);
+                ranking.distinctDays = manager.countDistinctDays(ranking.user.id, channelId);
             }
 
             const guildMembers = await interaction.guild.members.fetch({ user: rankings.map(ranking => ranking.user.id)});
 
-            interaction.reply(toTable(
+            interaction.reply(formatAsTable(
                 ['#', 'user', 'quantity', 'days'],
                 rankings.map(({ user, quantity, distinctDays }, index) => [index + 1, guildMembers.get(user.id).nickname || user.displayName, quantity, distinctDays])
             ));
