@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
-const { token, channels } = require('./config.json');
+const config = require('./config.json');
 const { initializeChannelCount, channelCounts, handleMessage } = require('./utils');
 
 const client = new Client({
@@ -33,18 +33,24 @@ for (const folder of commandFolders) {
     }
 }
 
-client.once(Events.ClientReady, c => {
-    console.log(`Ready! Logged in as ${c.user.tag}`);
+client.once(Events.ClientReady, async c => {
+    console.log(`Logged in as ${c.user.tag}.`);
 
-    client.guilds.cache.forEach(guild => {
-        const channels = guild.channels.cache.filter(channel =>
-            channel.name.includes('count')
-        );
+    const channelsToInitialize = client.guilds.cache.flatMap(guild => 
+        (config.channels)
+            ? guild.channels.cache.filter(channel => config.channels.includes(channel.id))
+            : guild.channels.cache.filter(channel => channel.name.includes('count'))
+    );
 
-        channels.forEach(channel => {
-            initializeChannelCount(client, channel.id); // Replace this with your actual function
-        }); 
-    });
+    console.log(`Initializing ${channelsToInitialize.size} channels.`);
+
+    await Promise.all(channelsToInitialize.map(async channel => {
+        console.log(`Initializing ${channel.name}.`)
+        await initializeChannelCount(client, channel.id); // Replace this with your actual function
+        console.log(`Done.`);
+    }));
+
+    console.log(`All channels initialized. Ready to receive inputs.`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -92,8 +98,8 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 function isAppropriateChannel(message) {
-    if (channels) {
-        return channels.includes(message.channelId);
+    if (config.channels) {
+        return config.channels.includes(message.channelId);
     } else {
         const channelName = message.channel.name.toLowerCase();
         // if the channel name has count in it or test
@@ -127,4 +133,4 @@ async function doneHandler(message) {
 
 client.on(Events.MessageCreate, doneHandler);
 
-client.login(token);
+client.login(config.token);

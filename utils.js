@@ -11,17 +11,19 @@ const MessageType = {
 };
 
 async function initializeChannelCount(client, channelId) {
-    console.log("Counting from history")
     const channel = await client.channels.fetch(channelId);
-    channelCounts[channelId] = 0;
-    let messages = await channel.messages.fetch({ limit: 100 });
-    while (messages.size > 0) {
-        messages.forEach(message => {
-            handleMessage(message, MessageType.Historical);
-        });
-        messages = await channel.messages.fetch({ limit: 100, before: messages.last().id });
+    const messages = [];
+    let buffer = await channel.messages.fetch({ limit: 100 });
+    while (buffer.size > 0) {
+        messages.push(...buffer);
+        buffer = await channel.messages.fetch({ limit: 100, before: buffer.last().id });
     }
-    console.log("finished counting")
+
+    channelCounts[channelId] = 0;
+    for (let i = messages.length - 1; i >= 0; --i) {
+        const [id, message] = messages[i];
+        handleMessage(message, MessageType.Historical);
+    }
 }
 
 async function handleMessage(message, messageType = MessageType.Live) {
