@@ -22,7 +22,11 @@ module.exports = {
 
         try {
             const manager = await ReportManager.forChannel(channelId);
-            const rankings = manager.rankings();
+            const rankings = [
+                ...manager.rankings(),
+                // Sentinel value at end in case user has no reports
+                { user: { id: userId }, quantity: 0 },
+            ];
 
             const requestorIndex = rankings.findIndex(({user}) => user.id === userId);
             const requestorCount = rankings[requestorIndex].quantity;
@@ -33,7 +37,11 @@ module.exports = {
                 reply += ` You only need to do ${rankings[requestorIndex - 1].quantity - requestorCount + 1} more to be ${toOrdinal(requestorIndex)}!`;
             }
 
-            interaction.reply(reply);
+            const message = await interaction.reply({ content: reply, fetchReply: true });
+
+            if (requestorIndex === rankings.length - 1) {
+                message.react('🤡');
+            }
         } catch (error) {
             console.error(error);
             await interaction.reply('There was an error while fetching the message history.');

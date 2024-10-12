@@ -1,4 +1,4 @@
-const { Client, GuildBasedChannel, Message } = require('discord.js');
+const { Client, GuildBasedChannel, Message, User } = require('discord.js');
 const moment = require('moment-timezone');
 
 const REPORT_REGEX = /^(\d+)\s+done$/;
@@ -67,6 +67,9 @@ class ReportManager {
         return distinctDays.size;
     }
 
+    /**
+     * @returns {Array<{ user: User, quantity: number }>}
+     */
     rankings() {
         const countsByAuthor = {};
 
