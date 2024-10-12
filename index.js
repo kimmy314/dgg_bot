@@ -3,6 +3,7 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const config = require('./config.json');
 const { ReportManager } = require('./report-manager');
+const { toOrdinal } = require('./utils');
 
 const client = new Client({
     intents: [
@@ -104,15 +105,31 @@ function isAppropriateChannel(message) {
 }
 
 async function doneHandler(message) {
-    const channelId = message.channel.id
+    const authorId = message.author.id;
+    const channelId = message.channel.id;
+
     if (isAppropriateChannel(message)) {
         const manager = await ReportManager.forChannel(channelId);
 
         const countMatch = message.content.match(/^(\d+)\s+done$/);
         if (countMatch) {
             const prevCount = manager.totalCount;
+            const prevRanking = manager.rankings().findIndex(({user}) => user.id === authorId);
             manager.handleMessage(message);
             const currCount = manager.totalCount;
+            const currRankings = manager.rankings();
+            const currRanking = currRankings.findIndex(({user}) => user.id === authorId);
+
+            if (prevRanking !== -1 && prevRanking !== currRanking) {
+                const victor = currRankings[currRanking];
+                const victim = currRankings[prevRanking];
+
+                const needed = victor.quantity - victim.quantity + 1;
+
+                if (needed > 0) {
+                    message.reply(`You've moved up to ${toOrdinal(currRanking + 1)} place!\n<@${victim.user.id}>, do ${needed} more to redeem yourself!`);
+                }
+            }
 
             // Check if the previous count was below a hundreds boundary and the current count is at or above a new hundreds boundary
             const prevHundreds = Math.floor(prevCount / 100);

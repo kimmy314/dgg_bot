@@ -1,10 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { ReportManager } = require('../../report-manager');
-
-function toOrdinal(number) {
-    // Shamelessly stolen from https://stackoverflow.com/a/39466341
-    return `${number}${["st", "nd", "rd"][((number + 90) % 100 - 10) % 10 - 1] || "th"}`;
-}
+const { toOrdinal } = require('../../utils');
 
 module.exports = {
     category: 'utility',
