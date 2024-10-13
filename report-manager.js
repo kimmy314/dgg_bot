@@ -46,6 +46,8 @@ class ReportManager {
     /** @type {Report[]} */
     reports = [];
     totalCount = 0;
+    /** @type {Object.<string, Report[]>} */
+    reportsByDay = {};
 
     /**
      * @param {Client} client 
@@ -73,15 +75,21 @@ class ReportManager {
     rankings() {
         const countsByAuthor = {};
 
+        const today = moment().tz("US/Pacific").format('YYYY MM DD');
+
         for (const report of this.reports) {
             const id = report.message.author.id;
             if (!countsByAuthor[id]) {
                 countsByAuthor[id] = {
                     user: report.message.author,
                     quantity: report.quantity,
+                    today: 0,
                 };
             } else {
                 countsByAuthor[id].quantity += report.quantity;
+            }
+            if (moment(report.message.createdAt).tz("US/Pacific").format('YYYY MM DD') === today) {
+                countsByAuthor[id].today += report.quantity;
             }
         }
 
@@ -105,6 +113,9 @@ class ReportManager {
         };
 
         this.reports.push(report);
+
+        const today = moment().tz("US/Pacific").format('YYYY MM DD');
+        (this.reportsByDay[today] = this.reportsByDay[today] || []).push(report);
 
         this.#countReport(report);
         this.#reactToReport(report);
