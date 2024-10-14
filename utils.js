@@ -1,9 +1,9 @@
 
 function formatAsTable(headers, rows, footers) {
     const hasFooter = footers !== undefined;
-    
+
     headers = headers.map(header => `${header}`);
-    rows = rows.map(row => row.map(cell => `${[...cell].map(c => c.length === 1 ? c : '�').join('')}`));
+    rows = rows.map(row => row.map(cell => [...`${cell}`].map(c => c.length === 1 ? c : '?').join('')));
     footers = headers.map((_, index) => `${(footers || [])[index] || ''}`);
 
     const widths = headers.map((header, index) => Math.max(...[header, ...rows.map(row => row[index]), footers[index]].map(s => s.length)));
