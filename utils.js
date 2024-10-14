@@ -3,10 +3,10 @@ function formatAsTable(headers, rows, footers) {
     const hasFooter = footers !== undefined;
     
     headers = headers.map(header => `${header}`);
-    rows = rows.map(row => row.map(cell => `${cell}`));
+    rows = rows.map(row => row.map(cell => `${cell.map(c => c.length === 1 ? c : '�').join('')}`));
     footers = headers.map((_, index) => `${(footers || [])[index] || ''}`);
 
-    const widths = headers.map((header, index) => Math.max(...[header, ...rows.map(row => row[index]), footers[index]].map(s => [...s].length)));
+    const widths = headers.map((header, index) => Math.max(...[header, ...rows.map(row => row[index]), footers[index]].map(s => s.length)));
 
     const header = headers.map((header, index) => header.padStart(widths[index])).join(' | ')
     const divider = new Array(widths.reduce((acc, a) => acc + a, 0) + ((widths.length - 1) * 3)).fill('-').join('');
